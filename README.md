@@ -2,6 +2,10 @@
 
 A docker container environment to bundle the execution of `LibreOffice` to convert documents of various types (such as Word, OpenDocument, etc.) to PDF. An instance of `LibreOffice` will be run in the background, and controlled via a local socket (i.e. the UNO protocol).
 
+## Modifications in this fork
+    * Update requirements.txt to use recent libraries
+    * Added evaluation of 'LOGLEVEL' environment variable; defaults to 'INFO' 
+
 ## Usage
 
 This service is intended for use exclusively as a docker container. While it may be possible to
@@ -11,6 +15,7 @@ latest stable image off DockerHub and run it like this:
 ```shell
 docker pull alephdata/convert-document
 docker run -p 3000:3000 -ti alephdata/convert-document
+  --env CONVERTER_METHOD=unoconv  # is default, any other value seems to lead to a single process being started on each call
 ```
 
 Once the service has initialised, files can be sent to the `/convert` endpoint, and a PDF version
@@ -46,7 +51,7 @@ MIT, see `LICENSE`.
 
 
 ## Troubleshooting
-
+(Not sure if this still applies:)
 * `LibreOffice` keeps crashing on startup with `Fatal exception: Signal 11`
 
 If [AppArmor](https://help.ubuntu.com/community/AppArmor) is running on the host machine, it may be blocking `LibreOffice` from starting up.
