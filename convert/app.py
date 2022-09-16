@@ -11,6 +11,7 @@ from convert.util import CONVERT_DIR
 from convert.util import SystemFailure, ConversionFailure
 
 logging.basicConfig(level=logging.DEBUG)
+
 log = logging.getLogger("convert")
 app = Flask("convert")
 extensions = load_mime_extensions()
@@ -28,8 +29,8 @@ converter.unlock()
 @app.route("/health/live")
 def check_health():
     try:
-        if not converter.check_healthy():
-            return ("BUSY", 500)
+        if not converter.check_healthy():            
+            return ("BUSY", 500)        
         return ("OK", 200)
     except Exception:
         log.exception("Converter is not healthy.")
@@ -39,6 +40,7 @@ def check_health():
 @app.route("/health/ready")
 def check_ready():
     if converter.is_locked:
+        log.warning("Converter is busy!")
         return ("BUSY", 503)
     return ("OK", 200)
 
@@ -47,6 +49,7 @@ def check_ready():
 def reset():
     converter.kill()
     converter.unlock()
+    log.info("converter reset.")
     return ("OK", 200)
 
 
@@ -54,8 +57,10 @@ def reset():
 def convert():
     upload_file = None
     if not converter.lock():
+        log.warning("Converter is busy!")
         return ("BUSY", 503)
     try:
+        log.info("Starting conversion")
         converter.prepare()
         timeout = int(request.args.get("timeout", 7200))
         upload = request.files.get("file")
@@ -69,6 +74,7 @@ def convert():
         log.info("PDF convert: %s [%s]", upload_file, mime_type)
         upload.save(upload_file)
         out_file = converter.convert_file(upload_file, timeout)
+        log.debug("Finished conversion")
         return send_file(out_file, mimetype=PDF)
     except ConversionFailure as ex:
         converter.kill()
