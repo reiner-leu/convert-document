@@ -9,15 +9,8 @@ from convert.unoconv import UnoconvConverter
 from convert.formats import load_mime_extensions
 from convert.util import CONVERT_DIR
 from convert.util import SystemFailure, ConversionFailure
-# better solution see https://trstringer.com/logging-flask-gunicorn-the-manageable-way/
-loglevel_env = os.environ.get("LOGLEVEL", "INFO")
-loglevel = logging._nameToLevel.get(loglevel_env)
 
-if not loglevel :
-    loglevel = logging.INFO
-
-FORMAT = '%(asctime)s %(clientip)-15s %(user)-8s %(message)s'
-logging.basicConfig(level=loglevel, format=FORMAT)
+logging.basicConfig(level=logging.DEBUG)
 
 log = logging.getLogger("convert")
 app = Flask("convert")
