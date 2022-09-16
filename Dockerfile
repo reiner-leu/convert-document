@@ -36,12 +36,18 @@ USER app
 HEALTHCHECK --interval=10s --timeout=10s --retries=100 \
     CMD curl -f -s http://localhost:3000/health/live || exit 1
 
+# Der Health-check führt immer zu einem Log-Eintrag über stdout aber
+# der Host ist so konfiguriert, dass max. 3 x 5mb geloggt werden. Ansonsten:
+#https://stackoverflow.com/questions/36424335/how-to-perform-log-rotation-with-gunicorn
+#https://mattsegal.dev/django-gunicorn-nginx-logging.html "--capture_output" "True", \ ??
+#logging in Docker: https://sematext.com/blog/docker-logs-location/
+
 CMD ["gunicorn", \
     "-w", "4", \
     "--bind", "0.0.0.0:3000", \
     "--access-logfile", "-", \
     "--error-logfile", "-", \
-    "--log-level", "warning", \
+    "--log-level", "info", \
     "--timeout", "84600", \    
     "convert.app:app"]
 
